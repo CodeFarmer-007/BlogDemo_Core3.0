@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BlogDemo.Api.Models;
+using BlogDemo.Core.Model.ViewModel;
 
 namespace BlogDemo.Api.Controllers
 {
@@ -21,6 +22,10 @@ namespace BlogDemo.Api.Controllers
         }
 
         // GET: api/TodoItems
+        /// <summary>
+        /// 注释TodoItems
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
         {
@@ -73,19 +78,32 @@ namespace BlogDemo.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Love类注释显示
+        /// </summary>
+        /// <param name="model">Love实体参数</param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<bool> GetThisAction(Love model)
+        {
+            await Task.Delay(0);
+            return true;
+        }
+
         // POST: api/TodoItems
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
-        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem todoItem)
-        {
-            _context.TodoItems.Add(todoItem);
-            await _context.SaveChangesAsync();
-            //return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
+        //[HttpPost]
+        //public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem todoItem)
+        //{
+        //    _context.TodoItems.Add(todoItem);
+        //    await _context.SaveChangesAsync();
+        //    //return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
 
-            //使用 nameof 方便维护，看是否编译通过
-            return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
-        }
+        //    //使用 nameof 方便维护，看是否编译通过
+        //    return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
+        //}
+
 
         // DELETE: api/TodoItems/5
         [HttpDelete("{id}")]

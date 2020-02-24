@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using System.IO;
 
 namespace BlogDemo.Api
 {
@@ -15,7 +17,7 @@ namespace BlogDemo.Api
     {
         public IConfiguration Configuration { get; }
 
-        public string ApiName { get; set; } = "Blog.Core";
+        public string ApiName { get; set; } = "Blog.CoreDemo";
 
         public Startup(IConfiguration configuration)
         {
@@ -30,6 +32,30 @@ namespace BlogDemo.Api
 
             //获取程序集跟目录 --添加 Microsoft.DotNet.PlatformAbstractions Nuget包
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
+
+            //配置Swagger
+            services.AddSwaggerGen(a =>
+            {
+
+                a.SwaggerDoc("V1", new OpenApiInfo
+                {
+                    Version = "V1",
+                    Title = $"{ApiName}接口文档--Core 3.0",
+                    Description = $"{ApiName} Http Api V1",
+                    Contact = new OpenApiContact { Name = ApiName, Url = new System.Uri("https://www.jianshu.com/u/94102b59cc2a"), Email = "229318442@qq.com" },
+                    License = new OpenApiLicense { Name = ApiName, Url = new System.Uri("https://github.com/CodeFarmer-007/BlogDemo_Core3.0") }
+                });
+
+                a.OrderActionsBy(c => c.RelativePath);
+
+                //读取Api-XML注释文档
+                var xmlPath = Path.Combine(basePath, "BlogDemo.Api.xml");
+                a.IncludeXmlComments(xmlPath, true);
+
+                //读取Model-XML注释文档
+                var xmlModelPath = Path.Combine(basePath, "BlogDemo.Core.Model.xml");
+                a.IncludeXmlComments(xmlModelPath, true);
+            });
 
 
             #endregion
@@ -49,6 +75,19 @@ namespace BlogDemo.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            #region Swagger
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint($"/swagger/V1/swagger.json", $"{ApiName}  V1");
+
+                c.RoutePrefix = "";
+            });
+
+            #endregion
 
             app.UseHttpsRedirection();
 

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BlogDemo.Api</name>
+    </assembly>
+    <members>
+        <member name="M:BlogDemo.Api.Controllers.TodoItemsController.GetTodoItems">
+            <summary>
+            注释TodoItems
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BlogDemo.Api.Controllers.TodoItemsController.GetThisAction(BlogDemo.Core.Model.ViewModel.Love)">
+            <summary>
+            Love类注释显示
+            </summary>
+            <param name="model">Love实体参数</param>
+            <returns></returns>
+        </member>
+        <member name="T:BlogDemo.Api.Startup">
+            <summary>
+            启动文件配置 【依赖注入，跨域请求，Redis缓存等】
+            </summary>
+        </member>
+    </members>
+</doc>

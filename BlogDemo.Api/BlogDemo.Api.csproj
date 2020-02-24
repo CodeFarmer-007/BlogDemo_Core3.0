@@ -4,8 +4,13 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>..\BlogDemo.Api\BlogDemo.Api.xml</DocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\BlogDemo.Core\BlogDemo.Core.csproj" />
+    <ProjectReference Include="..\BlogDemo.Core\BlogDemo.Core.Model.csproj" />
     <ProjectReference Include="..\BlogDemo.Infrastructure\BlogDemo.Infrastructure.csproj" />
   </ItemGroup>
 

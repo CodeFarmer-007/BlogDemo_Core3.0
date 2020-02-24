@@ -2,14 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyName>BlogDemo.Core.Model</AssemblyName>
+    <RootNamespace>BlogDemo.Core.Model</RootNamespace>
+    <DocumentationFile>..\BlogDemo.Core\BlogDemo.Core.Model.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BlogDemo.Core\BlogDemo.Core.Model.csproj" />
-  </ItemGroup>
 
 </Project>
