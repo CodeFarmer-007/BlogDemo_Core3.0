@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.IO;
+using BlogDemo.Core.Common.DB;
 
 namespace BlogDemo.Api
 {
@@ -28,6 +29,7 @@ namespace BlogDemo.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
             #region Swagger配置
 
             //获取程序集跟目录 --添加 Microsoft.DotNet.PlatformAbstractions Nuget包

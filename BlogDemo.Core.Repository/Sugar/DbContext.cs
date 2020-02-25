@@ -157,7 +157,7 @@ namespace BlogDemo.Core.Repository.Sugar
         }
 
         /// <summary>
-        /// 功能描述:根据数据库表生产实体类
+        /// 功能描述:根据数据库表生产实体类   【DbFirst】
         /// 作　　者:Blog.Core
         /// </summary>
         /// <param name="strPath">实体类存放路径</param>
@@ -277,7 +277,7 @@ namespace {Namespace}
         }
 
         /// <summary>
-        /// 功能描述:根据实体类生成数据库表
+        /// 功能描述:根据实体类生成数据库表   【CodeFirst】
         /// 作　　者:Blog.Core
         /// </summary>
         /// <param name="blnBackupTable">是否备份表</param>
