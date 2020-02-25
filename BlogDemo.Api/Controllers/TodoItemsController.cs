@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BlogDemo.Api.Models;
-using BlogDemo.Core.Model.ViewModel;
+using BlogDemo.Core.Model.ViewModels;
 
 namespace BlogDemo.Api.Controllers
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BlogDemo.Core.Model.ViewModel
+namespace BlogDemo.Core.Model.ViewModels
 {
     /// <summary>
     /// 这就是爱

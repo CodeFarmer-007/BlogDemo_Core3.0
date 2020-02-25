@@ -1,18 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>..\BlogDemo.Api\BlogDemo.Api.xml</DocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BlogDemo.Core\BlogDemo.Core.Model.csproj" />
-    <ProjectReference Include="..\BlogDemo.Infrastructure\BlogDemo.Infrastructure.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
@@ -28,6 +23,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlogDemo.Core.IServices\BlogDemo.Core.IService.csproj" />
   </ItemGroup>
 
 </Project>
