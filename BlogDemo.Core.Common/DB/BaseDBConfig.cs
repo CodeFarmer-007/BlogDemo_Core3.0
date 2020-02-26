@@ -49,7 +49,7 @@ namespace BlogDemo.Core.Common.DB
             }
             else
             {
-                return "Server=10.0.11.144;Database=WMBlogDB;User ID=sa;Password=im!6EHKQI3xHK8OU;";
+                return "Server=.;Database=WMBlogDB;User ID=sa;Password=svse;";
             }
 
         }
