@@ -22,5 +22,11 @@
             启动文件配置 【依赖注入，跨域请求，Redis缓存等】
             </summary>
         </member>
+        <member name="M:BlogDemo.Api.Startup.ConfigureContainer(Autofac.ContainerBuilder)">
+            <summary>
+             新增服务 注入到Autofac 容器
+            </summary>
+            <param name="builder"></param>
+        </member>
     </members>
 </doc>

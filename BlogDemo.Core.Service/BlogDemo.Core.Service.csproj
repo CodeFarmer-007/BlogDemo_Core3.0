@@ -1,12 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\BlogDemo.Api\bin\Debug\</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\BlogDemo.Core.IRepository\BlogDemo.Core.IRepository.csproj" />
     <ProjectReference Include="..\BlogDemo.Core.IServices\BlogDemo.Core.IService.csproj" />
+    <ProjectReference Include="..\BlogDemo.Core\BlogDemo.Core.Model.csproj" />
   </ItemGroup>
 
 </Project>

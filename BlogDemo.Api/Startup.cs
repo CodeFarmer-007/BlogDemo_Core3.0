@@ -8,6 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.IO;
 using BlogDemo.Core.Common.DB;
+using System.Reflection;
+using Autofac;
+using Autofac.Extras.DynamicProxy;
+using BlogDemo.Core.Service;
+using BlogDemo.Core.IService;
 
 namespace BlogDemo.Api
 {
@@ -29,11 +34,10 @@ namespace BlogDemo.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            #region Swagger配置
-
             //获取程序集跟目录 --添加 Microsoft.DotNet.PlatformAbstractions Nuget包
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
+
+            #region Swagger配置
 
             //配置Swagger
             services.AddSwaggerGen(a =>
@@ -63,10 +67,34 @@ namespace BlogDemo.Api
             #endregion
 
             //指定数据库上下文将使用内存中数据库
-            services.AddDbContext<TodoContext>(opt =>
-                opt.UseInMemoryDatabase("TodoList"));  //UseInMemoryDatabase  添加Nuget  Microsoft.EntityFrameworkCore.InMemory
+            //services.AddDbContext<TodoContext>(opt =>
+            //    opt.UseInMemoryDatabase("TodoList"));  //UseInMemoryDatabase  添加Nuget  Microsoft.EntityFrameworkCore.InMemory
 
             services.AddControllers();
+        }
+
+        /// <summary>
+        ///  新增服务 注入到Autofac 容器
+        /// </summary>
+        /// <param name="builder"></param>
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            //获取程序集跟目录 --添加 Microsoft.DotNet.PlatformAbstractions Nuget包
+            var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
+
+            var servicesDllFile = Path.Combine(basePath, "BlogDemo.Core.Service.dll");
+
+            var assemblysServices = Assembly.LoadFile(servicesDllFile);
+
+            builder.RegisterAssemblyTypes(assemblysServices)
+               .AsImplementedInterfaces()
+               .InstancePerLifetimeScope()
+               .EnableInterfaceInterceptors();
+
+            var repositoryDllFile = Path.Combine(basePath, "BlogDemo.Core.Repository.dll");
+            var assemblysRepository = Assembly.LoadFrom(repositoryDllFile);
+            builder.RegisterAssemblyTypes(assemblysRepository).AsImplementedInterfaces();
+
         }
 
         //管道（中间件）【具体指定如何处理每个http请求】

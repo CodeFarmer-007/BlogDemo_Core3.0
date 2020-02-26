@@ -12,7 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
+    <PackageReference Include="sqlSugarCore" Version="5.0.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlogDemo.Core.Common\BlogDemo.Core.Common.csproj" />
   </ItemGroup>
 
 </Project>
