@@ -1,4 +1,5 @@
-﻿using BlogDemo.Core.IRepository;
+﻿using BlogDemo.Core.Common.Attribute;
+using BlogDemo.Core.IRepository;
 using BlogDemo.Core.IService;
 using BlogDemo.Core.Model.Models.WMBlogDB;
 using BlogDemo.Core.Service.Base;
@@ -15,6 +16,12 @@ namespace BlogDemo.Core.Service
         public AdvertisementService(IAdvertisementRepository dal)
         {
             this.BaseDal = _dal = dal;
+        }
+
+        [Caching(AbsoluteExpiration = 10)]  //??它是怎么指定  CachingAttribute 的  ??
+        public int SumAandB()
+        {
+            throw new NotImplementedException();
         }
     }
 }

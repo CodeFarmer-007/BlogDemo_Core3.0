@@ -13,6 +13,9 @@ using Autofac;
 using Autofac.Extras.DynamicProxy;
 using BlogDemo.Core.Service;
 using BlogDemo.Core.IService;
+using BlogDemo.Api.AOP;
+using BlogDemo.Core.Common.MemoryCache;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BlogDemo.Api
 {
@@ -36,6 +39,17 @@ namespace BlogDemo.Api
         {
             //获取程序集跟目录 --添加 Microsoft.DotNet.PlatformAbstractions Nuget包
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
+
+            #region 工具类服务注入
+            // 缓存注入
+            services.AddScoped<ICaching, MemoryCaching>();
+            services.AddSingleton<IMemoryCache>(factory =>
+            {
+                var cache = new MemoryCache(new MemoryCacheOptions());
+                return cache;
+            });
+
+            #endregion
 
             #region Swagger配置
 
@@ -82,6 +96,16 @@ namespace BlogDemo.Api
             //获取程序集跟目录 --添加 Microsoft.DotNet.PlatformAbstractions Nuget包
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
 
+            #region AOP
+
+            //注册要通过反射创建的组件
+            builder.RegisterType<BlogLogAOP>(); //拦截器进行注册
+            builder.RegisterType<BlogCacheAOP>();
+
+            #endregion
+
+            #region 带有接口层的服务注入
+
             var servicesDllFile = Path.Combine(basePath, "BlogDemo.Core.Service.dll");
 
             var assemblysServices = Assembly.LoadFile(servicesDllFile);
@@ -89,11 +113,14 @@ namespace BlogDemo.Api
             builder.RegisterAssemblyTypes(assemblysServices)
                .AsImplementedInterfaces()
                .InstancePerLifetimeScope()
-               .EnableInterfaceInterceptors();
+               .EnableInterfaceInterceptors()
+               .InterceptedBy(typeof(BlogLogAOP), typeof(BlogCacheAOP)); //可以放一个AOP拦截器集合
 
             var repositoryDllFile = Path.Combine(basePath, "BlogDemo.Core.Repository.dll");
             var assemblysRepository = Assembly.LoadFrom(repositoryDllFile);
             builder.RegisterAssemblyTypes(assemblysRepository).AsImplementedInterfaces();
+
+            #endregion
 
         }
 

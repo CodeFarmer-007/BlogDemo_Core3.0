@@ -4,6 +4,47 @@
         <name>BlogDemo.Api</name>
     </assembly>
     <members>
+        <member name="T:BlogDemo.Api.AOP.BlogCacheAOP">
+            <summary>
+            面向切面的缓存使用  【缓存拦截器】
+            </summary>
+        </member>
+        <member name="T:BlogDemo.Api.AOP.BlogLogAOP">
+            <summary>
+            拦截器 BlogLogAOP 继承 IInterceptor接口
+            </summary>
+        </member>
+        <member name="M:BlogDemo.Api.AOP.BlogLogAOP.Intercept(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            实例化 IInerceptor 唯一方式
+            </summary>
+            <param name="invocation">包含拦截方法的信息</param>
+        </member>
+        <member name="T:BlogDemo.Api.AOP.CacheAOPbase">
+            <summary>
+            抽象类
+            </summary>
+        </member>
+        <member name="M:BlogDemo.Api.AOP.CacheAOPbase.Intercept(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            AOP的拦截方法
+            </summary>
+            <param name="invocation"></param>
+        </member>
+        <member name="M:BlogDemo.Api.AOP.CacheAOPbase.CustomCacheKey(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            自定义缓存的key
+            </summary>
+            <param name="invocation"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BlogDemo.Api.AOP.CacheAOPbase.GetArgumentValue(System.Object)">
+            <summary>
+            object 转 string
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
         <member name="M:BlogDemo.Api.Controllers.TodoItemsController.GetTodoItems">
             <summary>
             注释TodoItems

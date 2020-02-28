@@ -8,6 +8,6 @@ namespace BlogDemo.Core.IService
 {
     public interface IAdvertisementService : IBaseServices<Advertisement>
     {
-
+        int SumAandB();
     }
 }
