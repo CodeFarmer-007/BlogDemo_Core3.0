@@ -20,6 +20,11 @@
             </summary>
             <param name="invocation">包含拦截方法的信息</param>
         </member>
+        <member name="T:BlogDemo.Api.AOP.BlogRedisCacheAOP">
+            <summary>
+            面向切面的缓存使用  【Redis缓存截器】
+            </summary>
+        </member>
         <member name="T:BlogDemo.Api.AOP.CacheAOPbase">
             <summary>
             抽象类
