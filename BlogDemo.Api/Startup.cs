@@ -16,6 +16,7 @@ using BlogDemo.Core.IService;
 using BlogDemo.Api.AOP;
 using BlogDemo.Core.Common.MemoryCache;
 using Microsoft.Extensions.Caching.Memory;
+using BlogDemo.Core.Common.Redis;
 
 namespace BlogDemo.Api
 {
@@ -48,6 +49,9 @@ namespace BlogDemo.Api
                 var cache = new MemoryCache(new MemoryCacheOptions());
                 return cache;
             });
+
+            // Redis×¢Èë
+            services.AddScoped<IRedisCacheManager, RedisCacheManager>();
 
             #endregion
 
