@@ -6,6 +6,7 @@ using BlogDemo.Core.Service.Base;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BlogDemo.Core.Service
 {
@@ -19,7 +20,7 @@ namespace BlogDemo.Core.Service
         }
 
         [Caching(AbsoluteExpiration = 10)]  //??它是怎么指定  CachingAttribute 的  ??
-        public int SumAandB()
+        public Task<int> SumAndB()
         {
             throw new NotImplementedException();
         }

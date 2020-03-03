@@ -58,11 +58,13 @@ namespace BlogDemo.Api.AOP
                         }
                         else
                         {
+                            //Task 无返回方法 指定时间内不允许重新运行
                             response = Task.Yield();
                         }
                     }
                     else
                     {
+                        // 核心4，要进行 ChangeType
                         response = Convert.ChangeType(_cache.Get<object>(cacheKey), type);
                     }
 
@@ -94,7 +96,7 @@ namespace BlogDemo.Api.AOP
                         response = string.Empty;
                     }
 
-                    //执行Key赋值
+                    //执行Key赋值 【将获取到指定的response 和特性的缓存时间，进行set操作】
                     _cache.Set(cacheKey, response, TimeSpan.FromMinutes(qCachingAttribute.AbsoluteExpiration));
                 }
             }
