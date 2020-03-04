@@ -20,6 +20,7 @@ namespace BlogDemo.Api.Controllers
         }
 
         [HttpGet]
+        [Route("GetInfo")]  //路由规则
         public async Task<bool> GetInfo()
         {
             await Task.Delay(0);

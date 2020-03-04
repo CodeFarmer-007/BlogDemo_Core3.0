@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>CROS 跨域的三种方式</title>
+    <style>
+        div {
+            margin: 10px;
+            word-wrap: break-word;
+        }
+    </style>
+
+    <script src="https://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+        $(function () {
+
+            $("#jsonP").click(function () {
+                $.getJSON("/api/Advertisement/GetInfo", function (data, status) {
+                    console.log(data);
+                    console.log(status);
+                    $("#jsonPData").html(data);
+                });
+            });
+
+            $("#cors").click(function () {
+                $.get("/api/Advertisement/GetInfo", function (data, status) {
+                    console.log(data);
+                    $("#status-cors").html("状态: " + status);
+                    $("#data-cors").html("数据: " + data ? data.token : "失败");
+                });
+            });
+
+            $.ajax({
+                type: "Get",
+                url: "/WeatherForecast",
+                success: function (data, status) {
+                    console.log(data);
+                    $("#status-cors-post").html("状态: " + status);
+                    $("#data-cors-post").html("数据: " + data);
+                }
+            });
+
+        });
+    </script>
+</head>
+<body>
+    <h3>通过JsonP实现跨域请求</h3>
+    <button id="jsonP">发送一个Get</button>
+    <div id="jsonPStatus"></div>
+    <div id="jsonPData"></div>
+
+    <hr />
+
+    <h3>添加请求头跨域</h3>
+
+    <hr />
+
+    <h3>通过CORS实现跨域请求，另需要在服务器端配置CORS</h3>
+    <button id="cors">发送一个Get</button>
+
+    <div id="corsStatus"></div>
+    <div id="corsData"></div>
+    <hr />
+
+    <button id="cors-Post">发送一个Post</button>
+    <div id="corsStatus-Post"></div>
+    <div id="corsData-Post"></div>
+
+</body>
+</html>

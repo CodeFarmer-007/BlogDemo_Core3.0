@@ -152,6 +152,8 @@ namespace BlogDemo.Api
 
             app.UseHttpsRedirection();
 
+            app.UseStaticFiles(); //¶ÁÈ¡¾²Ì¬ÎÄ¼þ wwwroot
+
             app.UseRouting();
 
             app.UseAuthorization();
