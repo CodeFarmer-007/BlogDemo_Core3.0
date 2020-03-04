@@ -41,6 +41,20 @@ namespace BlogDemo.Api
             //获取程序集跟目录 --添加 Microsoft.DotNet.PlatformAbstractions Nuget包
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
 
+            #region CROS
+            services.AddCors(a =>
+            {
+                //配置策略    限制请求 
+                a.AddPolicy("LimitRequests", policy =>
+                {
+                    // 支持多个域名端口，注意端口号后不要带/斜杆：比如localhost:8000/，是错的
+                    // http://127.0.0.1:1818 和 http://localhost:1818 是不一样的，尽量写两个
+                    policy.WithOrigins("http://localhost:753")
+                    .AllowAnyHeader().AllowAnyMethod();
+                });
+            });
+            #endregion
+
             #region 工具类服务注入
             // 缓存注入
             services.AddScoped<ICaching, MemoryCaching>();
@@ -150,11 +164,15 @@ namespace BlogDemo.Api
 
             #endregion
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseStaticFiles(); //读取静态文件 wwwroot
 
             app.UseRouting();
+
+            //如果你使用了 app.UserMvc() 或者 app.UseHttpsRedirection()这类的中间件，一定要把 app.UseCors() 写在它们的上边，先进行跨域，再进行 Http 请求，否则会提示跨域失败。
+            //因为这两个都是涉及到 Http请求的，如果你不跨域就直接转发或者mvc，那肯定报错
+            app.UseCors("LimitRequests");
 
             app.UseAuthorization();
 

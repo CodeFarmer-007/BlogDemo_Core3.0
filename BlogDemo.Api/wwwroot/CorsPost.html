@@ -15,7 +15,7 @@
         $(function () {
 
             $("#jsonP").click(function () {
-                $.getJSON("/api/Advertisement/GetInfo", function (data, status) {
+                $.getJSON("https://localhost:44381/api/Advertisement/GetInfo", function (data, status) {
                     console.log(data);
                     console.log(status);
                     $("#jsonPData").html(data);
