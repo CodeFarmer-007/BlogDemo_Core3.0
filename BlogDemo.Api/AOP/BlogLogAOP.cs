@@ -1,5 +1,6 @@
 ﻿using BlogDemo.Core.Common.LogHelper;
 using Castle.DynamicProxy;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,8 @@ namespace BlogDemo.Api.AOP
 
             try
             {
+                MiniProfiler.Current.Step($"执行Service方法：{invocation.Method.Name}() -> ");
+
                 //执行当前访问的服务方法,(注意:如果下边还有其他的AOP拦截器的话,会跳转到其他的AOP里)
                 invocation.Proceed();
             }

@@ -17,6 +17,8 @@ using BlogDemo.Api.AOP;
 using BlogDemo.Core.Common.MemoryCache;
 using Microsoft.Extensions.Caching.Memory;
 using BlogDemo.Core.Common.Redis;
+using StackExchange.Profiling.Storage;
+using System;
 
 namespace BlogDemo.Api
 {
@@ -53,6 +55,16 @@ namespace BlogDemo.Api
                     .AllowAnyHeader().AllowAnyMethod();
                 });
             });
+            #endregion
+
+            #region 代码分析器
+
+            services.AddMiniProfiler(options =>
+            {
+                options.RouteBasePath = "/profiler";   //注意这个路径要和下边 index.html 脚本配置中的一致
+                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(10);
+            });
+
             #endregion
 
             #region 工具类服务注入
@@ -151,6 +163,8 @@ namespace BlogDemo.Api
                 app.UseDeveloperExceptionPage();
             }
 
+          
+
             #region Swagger
 
             app.UseSwagger();
@@ -160,9 +174,14 @@ namespace BlogDemo.Api
                 c.SwaggerEndpoint($"/swagger/V1/swagger.json", $"{ApiName}  V1");
 
                 c.RoutePrefix = "";
+                c.IndexStream = () => GetType().GetTypeInfo().Assembly.GetManifestResourceStream("BlogDemo.Api.index.html");
             });
 
             #endregion
+
+
+            app.UseMiniProfiler();
+
 
             //app.UseHttpsRedirection();
 

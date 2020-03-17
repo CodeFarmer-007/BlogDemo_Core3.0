@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BlogDemo.Core.Common.Helper
@@ -58,18 +59,14 @@ namespace BlogDemo.Core.Common.Helper
         {
             try
             {
-                var val = string.Empty;
-                for (int i = 0; i < sections.Length; i++)
+                if (sections.Any())
                 {
-                    val += sections[i] + ":";
+                    return Configuration[string.Join(":", sections)];
                 }
+            }
+            catch (Exception) { }
 
-                return Configuration[val.TrimEnd(':')];
-            }
-            catch (Exception)
-            {
-                return "";
-            }
+            return "";
 
         }
     }
