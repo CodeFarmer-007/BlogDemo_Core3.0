@@ -20,6 +20,12 @@
             </summary>
             <param name="invocation">包含拦截方法的信息</param>
         </member>
+        <member name="M:BlogDemo.Api.AOP.BlogLogAOP.IsAsyncMethod(System.Reflection.MethodInfo)">
+            <summary>
+            判断是否是异步方法
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:BlogDemo.Api.AOP.BlogRedisCacheAOP">
             <summary>
             面向切面的缓存使用  【Redis缓存截器】

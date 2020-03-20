@@ -46,6 +46,10 @@ namespace BlogDemo.Core.Repository.Base
 
         public async Task<TEntity> QueryById(object objId)
         {
+            //Aop 可以捕获异常
+            //string ss = "XX";
+            //var gg = Convert.ToInt32(ss);
+
             //return await Task.Run(() => _db.Queryable<TEntity>().InSingle(objId));
             return await _db.Queryable<TEntity>().In(objId).SingleAsync();
         }

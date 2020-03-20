@@ -16,6 +16,10 @@ namespace BlogDemo.Core.Service.Base
 
         public async Task<TEntity> QueryById(object objId)
         {
+            //Aop 可以捕获异常
+            //string ss = "XX";
+            //var gg = Convert.ToInt32(ss);
+
             return await BaseDal.QueryById(objId);
         }
         /// <summary>

@@ -34,6 +34,11 @@ namespace BlogDemo.Api.Controllers
         {
             await Task.Delay(0);
 
+            //AOP捕获不到
+            //string ss = "XX";
+            //var gg = Convert.ToInt32(ss);
+
+
             var state = await _advertisementService.QueryById(2);
 
             return true;
