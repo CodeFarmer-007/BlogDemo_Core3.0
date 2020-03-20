@@ -50,6 +50,72 @@
             <param name="arg"></param>
             <returns></returns>
         </member>
+        <member name="T:BlogDemo.Api.AuthHelper.JwtHelper">
+            <summary>
+            JWT由 头【指定JWT字符串的加密规则】、PayLoad【报文、显示已注册声明】、加密签名 三部分组成
+            </summary>
+        </member>
+        <member name="M:BlogDemo.Api.AuthHelper.JwtHelper.SerializeJwt(System.String)">
+            <summary>
+            解析
+            </summary>
+            <param name="jwtStr"></param>
+            <returns></returns>
+        </member>
+        <member name="T:BlogDemo.Api.AuthHelper.TokenModelJwt">
+            <summary>
+            令牌
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Api.AuthHelper.TokenModelJwt.Uid">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Api.AuthHelper.TokenModelJwt.Phone">
+            <summary>
+            手机
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Api.AuthHelper.TokenModelJwt.Icon">
+            <summary>
+            头像
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Api.AuthHelper.TokenModelJwt.UNickName">
+            <summary>
+            昵称
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Api.AuthHelper.TokenModelJwt.Role">
+            <summary>
+            角色
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Api.AuthHelper.TokenModelJwt.Work">
+            <summary>
+            职能
+            </summary>
+        </member>
+        <member name="T:BlogDemo.Api.Controllers.AdvertisementController">
+            <summary>
+            测试
+            </summary>
+        </member>
+        <member name="M:BlogDemo.Api.Controllers.AdvertisementController.GetInfo">
+            <summary>
+            获取
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BlogDemo.Api.Controllers.LoginController.GetJwtToken(System.String,System.String)">
+            <summary>
+            获取Token令牌
+            </summary>
+            <param name="userId"></param>
+            <param name="userpass"></param>
+            <returns></returns>
+        </member>
         <member name="M:BlogDemo.Api.Controllers.TodoItemsController.GetTodoItems">
             <summary>
             注释TodoItems
