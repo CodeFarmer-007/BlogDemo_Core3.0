@@ -18,7 +18,8 @@ namespace BlogDemo.Api.Filter
     public class GlobalExceptionsFilter : IExceptionFilter
     {
         private readonly IWebHostEnvironment _env;
-        //private readonly ILogger<GlobalExceptionsFilter> _logger;
+        private readonly ILogger<GlobalExceptionsFilter> _logger;
+
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(GlobalExceptionsFilter));
 
         public GlobalExceptionsFilter(IWebHostEnvironment env, ILogger<GlobalExceptionsFilter> logger)
