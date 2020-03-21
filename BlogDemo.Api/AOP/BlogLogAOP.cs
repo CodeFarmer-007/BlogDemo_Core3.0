@@ -59,11 +59,11 @@ namespace BlogDemo.Api.AOP
                     }
                 }
                 else
-                { //同步
+                {  //同步1
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) //同步2
             {
                 LogEx(ex, ref dataIntercept);
             }

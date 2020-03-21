@@ -26,6 +26,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Threading.Tasks;
+using BlogDemo.Api.Filter;
+using Microsoft.Extensions.Logging;
+using BlogDemo.Core.Common.LogHelper;
 
 namespace BlogDemo.Api
 {
@@ -59,6 +62,7 @@ namespace BlogDemo.Api
             //读取AppSettings.json
             services.AddSingleton(new Appsettings(Env.ContentRootPath));
 
+
             #region CROS
             services.AddCors(a =>
             {
@@ -73,7 +77,7 @@ namespace BlogDemo.Api
             });
             #endregion
 
-            #region 代码分析器
+            #region 代码分析器 MiniProfiler
 
             services.AddMiniProfiler(options =>
             {
@@ -146,6 +150,15 @@ namespace BlogDemo.Api
 
             #endregion
 
+            #region GlobalExceptions
+
+            //注入全局异常捕获
+            services.AddControllers(a =>
+            {
+                a.Filters.Add(typeof(GlobalExceptionsFilter));
+            });
+
+            #endregion
 
             #region JWT官方授权认证
 
@@ -263,6 +276,7 @@ namespace BlogDemo.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
 
             #region Swagger
 
