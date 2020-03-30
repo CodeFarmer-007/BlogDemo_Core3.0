@@ -175,5 +175,43 @@
             </summary>
             <param name="builder"></param>
         </member>
+        <member name="T:BlogDemo.Api.SwaggerHelper.CustomApiVersion">
+            <summary>
+            自定义Api版本
+            </summary>
+        </member>
+        <member name="F:BlogDemo.Api.SwaggerHelper.CustomApiVersion.ApiVersions.v1">
+            <summary>
+            v1 版本
+            </summary>
+        </member>
+        <member name="F:BlogDemo.Api.SwaggerHelper.CustomApiVersion.ApiVersions.v2">
+            <summary>
+            v2 版本
+            </summary>
+        </member>
+        <member name="T:BlogDemo.Api.SwaggerHelper.CustomRouteAttribute">
+            <summary>
+            自定义路由 /api/{version}/[controler]/[action]
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Api.SwaggerHelper.CustomRouteAttribute.GroupName">
+            <summary>
+            分组名称,是来实现接口 IApiDescriptionGroupNameProvider
+            </summary>
+        </member>
+        <member name="M:BlogDemo.Api.SwaggerHelper.CustomRouteAttribute.#ctor(System.String)">
+            <summary>
+            自定义路由构造函数，继承基类路由
+            </summary>
+            <param name="actionName"></param>
+        </member>
+        <member name="M:BlogDemo.Api.SwaggerHelper.CustomRouteAttribute.#ctor(BlogDemo.Api.SwaggerHelper.CustomApiVersion.ApiVersions,System.String)">
+            <summary>
+            自定义版本+路由构造函数，继承基类路由
+            </summary>
+            <param name="version"></param>
+            <param name="actionName"></param>
+        </member>
     </members>
 </doc>

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlogDemo.Api.SwaggerHelper;
 using BlogDemo.Core.IService;
 using Castle.Core.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using static BlogDemo.Api.SwaggerHelper.CustomApiVersion;
 
 namespace BlogDemo.Api.Controllers
 {
@@ -30,16 +32,16 @@ namespace BlogDemo.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("GetInfo")]  //路由规则
+        //[Route("GetInfo")]  //路由规则
         [Authorize(Policy = "SystemOrAdmin")]
+        [CustomRoute(ApiVersions.v2, "GetInfo")]
         public async Task<bool> GetInfo()
         {
             await Task.Delay(0);
 
             //AOP捕获不到
-            string ss = "XX";
-            var gg = Convert.ToInt32(ss);
-
+            //string ss = "XX";
+            //var gg = Convert.ToInt32(ss);
 
             var state = await _advertisementService.QueryById(2);
 

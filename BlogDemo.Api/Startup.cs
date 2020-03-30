@@ -29,6 +29,8 @@ using System.Threading.Tasks;
 using BlogDemo.Api.Filter;
 using Microsoft.Extensions.Logging;
 using BlogDemo.Core.Common.LogHelper;
+using static BlogDemo.Api.SwaggerHelper.CustomApiVersion;
+using System.Linq;
 
 namespace BlogDemo.Api
 {
@@ -106,17 +108,19 @@ namespace BlogDemo.Api
             //配置Swagger
             services.AddSwaggerGen(a =>
             {
-
-                a.SwaggerDoc("V1", new OpenApiInfo
+                //版本控制
+                typeof(ApiVersions).GetEnumNames().ToList().ForEach(version =>
                 {
-                    Version = "V1",
-                    Title = $"{ApiName}接口文档--Core 3.1",
-                    Description = $"{ApiName} Http Api V1",
-                    Contact = new OpenApiContact { Name = ApiName, Url = new System.Uri("https://www.jianshu.com/u/94102b59cc2a"), Email = "229318442@qq.com" },
-                    License = new OpenApiLicense { Name = ApiName, Url = new System.Uri("https://github.com/CodeFarmer-007/BlogDemo_Core3.0") }
+                    a.SwaggerDoc(version, new OpenApiInfo
+                    {
+                        Version = version,
+                        Title = $"{ApiName}接口文档--Core 3.1",
+                        Description = $"{ApiName} Http Api {version}",
+                        Contact = new OpenApiContact { Name = ApiName, Url = new System.Uri("https://www.jianshu.com/u/94102b59cc2a"), Email = "229318442@qq.com" },
+                        License = new OpenApiLicense { Name = ApiName, Url = new System.Uri("https://github.com/CodeFarmer-007/BlogDemo_Core3.0") }
+                    });
+                    a.OrderActionsBy(o => o.RelativePath);
                 });
-
-                a.OrderActionsBy(c => c.RelativePath);
 
                 //读取Api-XML注释文档
                 var xmlPath = Path.Combine(basePath, "BlogDemo.Api.xml");
@@ -136,6 +140,7 @@ namespace BlogDemo.Api
                 //在header中添加token，传递到后台
                 a.OperationFilter<SecurityRequirementsOperationFilter>();
 
+                // 必须是 oauth2
                 a.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                 {
                     Description = "JWT授权(数据将在请求头中进行传输) 直接在下框中输入 Bearer {token} （注意两者之间是一个空格）",
@@ -284,7 +289,10 @@ namespace BlogDemo.Api
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"/swagger/V1/swagger.json", $"{ApiName}  V1");
+                typeof(ApiVersions).GetEnumNames().OrderByDescending(e => e).ToList().ForEach(versions =>
+                {
+                    c.SwaggerEndpoint($"/swagger/{versions}/swagger.json", $"{ApiName}  {versions}");
+                });
 
                 c.RoutePrefix = "";
                 c.IndexStream = () => GetType().GetTypeInfo().Assembly.GetManifestResourceStream("BlogDemo.Api.index.html");
