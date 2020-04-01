@@ -19,4 +19,8 @@
     <ProjectReference Include="..\BlogDemo.Core.Common\BlogDemo.Core.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ViewModels\GllyERP\" />
+  </ItemGroup>
+
 </Project>

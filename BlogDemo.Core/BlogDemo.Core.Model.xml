@@ -24,6 +24,136 @@
             返回数据集合
             </summary>
         </member>
+        <member name="T:BlogDemo.Core.Model.Models.GllyERP.ProductManagement">
+            <summary>
+            产品管理
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.ProductID">
+            <summary>
+            productID
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.Code">
+            <summary>
+            编码
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.ProductName">
+            <summary>
+            产品名称
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.ProductTypeParentId">
+            <summary>
+            productTypeParentId
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.ProductType">
+            <summary>
+            产品分类
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.ProductTypeName">
+            <summary>
+            productTypeName
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.Number">
+            <summary>
+            number
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.QuantitativeDescription">
+            <summary>
+            数量描述
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.ProductPrice">
+            <summary>
+            产品售价
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.ProductDescription">
+            <summary>
+            产品描述
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.ProductPicture">
+            <summary>
+            产品图片
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.StartTime">
+            <summary>
+            开始时间
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.EndTime">
+            <summary>
+            结束时间
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.Grade">
+            <summary>
+            等级
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.Remarks">
+            <summary>
+            备注
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.IsDelete">
+            <summary>
+            0存在1删除
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.IsValid">
+            <summary>
+            0有效1无效
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.CreateUserID">
+            <summary>
+            创建人ID
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.CreateUser">
+            <summary>
+            创建人
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.UpdateUserID">
+            <summary>
+            修改人ID
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.UpdateUser">
+            <summary>
+            修改人
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.UpdateTime">
+            <summary>
+            修改时间
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.ChangeLimitDays">
+            <summary>
+            变更限制天数
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.Models.GllyERP.ProductManagement.Region">
+            <summary>
+            地区
+            </summary>
+        </member>
         <member name="T:BlogDemo.Core.Model.PageModel`1">
             <summary>
             通用分页信息类
