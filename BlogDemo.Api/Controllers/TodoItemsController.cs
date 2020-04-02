@@ -1,23 +1,20 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlogDemo.Api.Models;
+using BlogDemo.Core.Model.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BlogDemo.Api.Models;
-using BlogDemo.Core.Model.ViewModels;
 
-namespace BlogDemo.Api.Controllers
-{
-    [Route("api/[controller]")]
+namespace BlogDemo.Api.Controllers {
+    [Route ("api/[controller]")]
     [ApiController]
-    public class TodoItemsController : ControllerBase
-    {
+    public class TodoItemsController : ControllerBase {
         private readonly TodoContext _context;
 
-        public TodoItemsController(TodoContext context)
-        {
+        public TodoItemsController (TodoContext context) {
             _context = context;
         }
 
@@ -27,20 +24,17 @@ namespace BlogDemo.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
-        {
-            return await _context.TodoItems.ToListAsync();
+        public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems () {
+            return await _context.TodoItems.ToListAsync ();
         }
 
         // GET: api/TodoItems/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
-        {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+        [HttpGet ("{id}")]
+        public async Task<ActionResult<TodoItem>> GetTodoItem (long id) {
+            var todoItem = await _context.TodoItems.FindAsync (id);
 
-            if (todoItem == null)
-            {
-                return NotFound();
+            if (todoItem == null) {
+                return NotFound ();
             }
 
             return todoItem;
@@ -49,33 +43,25 @@ namespace BlogDemo.Api.Controllers
         // PUT: api/TodoItems/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(long id, TodoItem todoItem)
-        {
-            if (id != todoItem.Id)
-            {
-                return BadRequest();
+        [HttpPut ("{id}")]
+        public async Task<IActionResult> PutTodoItem (long id, TodoItem todoItem) {
+            if (id != todoItem.Id) {
+                return BadRequest ();
             }
 
-            _context.Entry(todoItem).State = EntityState.Modified;
+            _context.Entry (todoItem).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TodoItemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
+            try {
+                await _context.SaveChangesAsync ();
+            } catch (DbUpdateConcurrencyException) {
+                if (!TodoItemExists (id)) {
+                    return NotFound ();
+                } else {
                     throw;
                 }
             }
 
-            return NoContent();
+            return NoContent ();
         }
 
         /// <summary>
@@ -84,9 +70,8 @@ namespace BlogDemo.Api.Controllers
         /// <param name="model">Love实体参数</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<bool> GetThisAction(Love model)
-        {
-            await Task.Delay(0);
+        public async Task<bool> GetThisAction (Love model) {
+            await Task.Delay (0);
             return true;
         }
 
@@ -104,26 +89,22 @@ namespace BlogDemo.Api.Controllers
         //    return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
         //}
 
-
         // DELETE: api/TodoItems/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<TodoItem>> DeleteTodoItem(long id)
-        {
-            var todoItem = await _context.TodoItems.FindAsync(id);
-            if (todoItem == null)
-            {
-                return NotFound();
+        [HttpDelete ("{id}")]
+        public async Task<ActionResult<TodoItem>> DeleteTodoItem (long id) {
+            var todoItem = await _context.TodoItems.FindAsync (id);
+            if (todoItem == null) {
+                return NotFound ();
             }
 
-            _context.TodoItems.Remove(todoItem);
-            await _context.SaveChangesAsync();
+            _context.TodoItems.Remove (todoItem);
+            await _context.SaveChangesAsync ();
 
             return todoItem;
         }
 
-        private bool TodoItemExists(long id)
-        {
-            return _context.TodoItems.Any(e => e.Id == id);
+        private bool TodoItemExists (long id) {
+            return _context.TodoItems.Any (e => e.Id == id);
         }
     }
 }

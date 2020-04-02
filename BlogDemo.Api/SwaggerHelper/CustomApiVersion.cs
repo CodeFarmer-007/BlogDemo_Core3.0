@@ -1,17 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BlogDemo.Api.SwaggerHelper
-{
+namespace BlogDemo.Api.SwaggerHelper {
     /// <summary>
     /// 自定义Api版本
     /// </summary>
-    public class CustomApiVersion
-    {
-        public enum ApiVersions
-        {
+    public class CustomApiVersion {
+        public enum ApiVersions {
             /// <summary>
             /// v1 版本
             /// </summary>

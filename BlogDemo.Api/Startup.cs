@@ -1,335 +1,300 @@
+using System;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using Autofac;
+using Autofac.Extras.DynamicProxy;
+using BlogDemo.Api.AOP;
+using BlogDemo.Api.AuthHelper;
+using BlogDemo.Api.Filter;
 using BlogDemo.Api.Models;
+using BlogDemo.Core.Common.DB;
+using BlogDemo.Core.Common.Helper;
+using BlogDemo.Core.Common.LogHelper;
+using BlogDemo.Core.Common.MemoryCache;
+using BlogDemo.Core.Common.Redis;
+using BlogDemo.Core.IService;
+using BlogDemo.Core.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using System.IO;
-using BlogDemo.Core.Common.DB;
-using System.Reflection;
-using Autofac;
-using Autofac.Extras.DynamicProxy;
-using BlogDemo.Core.Service;
-using BlogDemo.Core.IService;
-using BlogDemo.Api.AOP;
-using BlogDemo.Core.Common.MemoryCache;
-using Microsoft.Extensions.Caching.Memory;
-using BlogDemo.Core.Common.Redis;
-using StackExchange.Profiling.Storage;
-using System;
-using BlogDemo.Api.AuthHelper;
-using Swashbuckle.AspNetCore.Filters;
-using BlogDemo.Core.Common.Helper;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Threading.Tasks;
-using BlogDemo.Api.Filter;
 using Microsoft.Extensions.Logging;
-using BlogDemo.Core.Common.LogHelper;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using StackExchange.Profiling.Storage;
+using Swashbuckle.AspNetCore.Filters;
 using static BlogDemo.Api.SwaggerHelper.CustomApiVersion;
 using System.Linq;
 
-namespace BlogDemo.Api
-{
+namespace BlogDemo.Api {
     /// <summary>
-    /// Æô¶¯ÎÄ¼þÅäÖÃ ¡¾ÒÀÀµ×¢Èë£¬¿çÓòÇëÇó£¬Redis»º´æµÈ¡¿
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Redisï¿½ï¿½ï¿½ï¿½È¡ï¿½
     /// </summary>
-    public class Startup
-    {
+    public class Startup {
         public IConfiguration Configuration { get; }
 
-        //¶ÁÈ¡AppSettings.json
+        //ï¿½ï¿½È¡AppSettings.json
         public IWebHostEnvironment Env { get; }
 
         public string ApiName { get; set; } = "Blog.Api";
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
-        {
+        public Startup (IConfiguration configuration, IWebHostEnvironment env) {
             Configuration = configuration;
 
-            //¶ÁÈ¡AppSettings.json
+            //ï¿½ï¿½È¡AppSettings.json
             Env = env;
         }
 
-        //×¢²á·þÎñ
+        //×¢ï¿½ï¿½ï¿½ï¿½ï¿½
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-            //»ñÈ¡³ÌÐò¼¯¸úÄ¿Â¼ --Ìí¼Ó Microsoft.DotNet.PlatformAbstractions Nuget°ü
+        public void ConfigureServices (IServiceCollection services) {
+            //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ò¼¯¸ï¿½Ä¿Â¼ --ï¿½ï¿½ï¿½ï¿½ Microsoft.DotNet.PlatformAbstractions Nugetï¿½ï¿½
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
 
-            //¶ÁÈ¡AppSettings.json
-            services.AddSingleton(new Appsettings(Env.ContentRootPath));
-
+            //ï¿½ï¿½È¡AppSettings.json
+            services.AddSingleton (new Appsettings (Env.ContentRootPath));
 
             #region CROS
-            services.AddCors(a =>
-            {
-                //ÅäÖÃ²ßÂÔ    ÏÞÖÆÇëÇó 
-                a.AddPolicy("LimitRequests", policy =>
-                {
-                    // Ö§³Ö¶à¸öÓòÃû¶Ë¿Ú£¬×¢Òâ¶Ë¿ÚºÅºó²»Òª´ø/Ð±¸Ë£º±ÈÈçlocalhost:8000/£¬ÊÇ´íµÄ
-                    // http://127.0.0.1:1818 ºÍ http://localhost:1818 ÊÇ²»Ò»ÑùµÄ£¬¾¡Á¿Ð´Á½¸ö
-                    policy.WithOrigins("http://localhost:753")
-                    .AllowAnyHeader().AllowAnyMethod();
+            services.AddCors (a => {
+                //ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
+                a.AddPolicy ("LimitRequests", policy => {
+                    // Ö§ï¿½Ö¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¿Ú£ï¿½×¢ï¿½ï¿½Ë¿ÚºÅºï¿½Òªï¿½ï¿½/Ð±ï¿½Ë£ï¿½ï¿½ï¿½ï¿½ï¿½localhost:8000/ï¿½ï¿½ï¿½Ç´ï¿½ï¿½ï¿½
+                    // http://127.0.0.1:1818 ï¿½ï¿½ http://localhost:1818 ï¿½Ç²ï¿½Ò»ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½
+                    policy.WithOrigins ("http://localhost:753")
+                        .AllowAnyHeader ().AllowAnyMethod ();
                 });
             });
             #endregion
 
-            #region ´úÂë·ÖÎöÆ÷ MiniProfiler
+            #region ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ MiniProfiler
 
-            services.AddMiniProfiler(options =>
-            {
-                options.RouteBasePath = "/profiler";   //×¢ÒâÕâ¸öÂ·¾¶ÒªºÍÏÂ±ß index.html ½Å±¾ÅäÖÃÖÐµÄÒ»ÖÂ
-                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(10);
+            services.AddMiniProfiler (options => {
+                options.RouteBasePath = "/profiler"; //×¢ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½Òªï¿½ï¿½ï¿½Â±ï¿½ index.html ï¿½Å±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½Ò»ï¿½ï¿½
+                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes (10);
             });
 
             #endregion
 
-            #region ¹¤¾ßÀà·þÎñ×¢Èë
-            // »º´æ×¢Èë
-            services.AddScoped<ICaching, MemoryCaching>();
-            services.AddSingleton<IMemoryCache>(factory =>
-            {
-                var cache = new MemoryCache(new MemoryCacheOptions());
+            #region ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½
+            // ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½
+            services.AddScoped<ICaching, MemoryCaching> ();
+            services.AddSingleton<IMemoryCache> (factory => {
+                var cache = new MemoryCache (new MemoryCacheOptions ());
                 return cache;
             });
 
-            // Redis×¢Èë
-            services.AddScoped<IRedisCacheManager, RedisCacheManager>();
+            // Redis×¢ï¿½ï¿½
+            services.AddScoped<IRedisCacheManager, RedisCacheManager> ();
 
             #endregion
 
-            #region SwaggerÅäÖÃ
+            #region Swaggerï¿½ï¿½ï¿½ï¿½
 
-            //ÅäÖÃSwagger
-            services.AddSwaggerGen(a =>
-            {
-                //°æ±¾¿ØÖÆ
-                typeof(ApiVersions).GetEnumNames().ToList().ForEach(version =>
-                {
-                    a.SwaggerDoc(version, new OpenApiInfo
-                    {
+            //ï¿½ï¿½ï¿½ï¿½Swagger
+            services.AddSwaggerGen (a => {
+                //ï¿½æ±¾ï¿½ï¿½ï¿½ï¿½
+                typeof (ApiVersions).GetEnumNames ().ToList ().ForEach (version => {
+                    a.SwaggerDoc (version, new OpenApiInfo {
                         Version = version,
-                        Title = $"{ApiName}½Ó¿ÚÎÄµµ--Core 3.1",
-                        Description = $"{ApiName} Http Api {version}",
-                        Contact = new OpenApiContact { Name = ApiName, Url = new System.Uri("https://www.jianshu.com/u/94102b59cc2a"), Email = "229318442@qq.com" },
-                        License = new OpenApiLicense { Name = ApiName, Url = new System.Uri("https://github.com/CodeFarmer-007/BlogDemo_Core3.0") }
+                            Title = $"{ApiName}ï¿½Ó¿ï¿½ï¿½Äµï¿½--Core 3.1",
+                            Description = $"{ApiName} Http Api {version}",
+                            Contact = new OpenApiContact { Name = ApiName, Url = new System.Uri ("https://www.jianshu.com/u/94102b59cc2a"), Email = "229318442@qq.com" },
+                            License = new OpenApiLicense { Name = ApiName, Url = new System.Uri ("https://github.com/CodeFarmer-007/BlogDemo_Core3.0") }
                     });
-                    a.OrderActionsBy(o => o.RelativePath);
+                    a.OrderActionsBy (o => o.RelativePath);
                 });
 
-                //¶ÁÈ¡Api-XML×¢ÊÍÎÄµµ
-                var xmlPath = Path.Combine(basePath, "BlogDemo.Api.xml");
-                a.IncludeXmlComments(xmlPath, true);
+                //ï¿½ï¿½È¡Api-XML×¢ï¿½ï¿½ï¿½Äµï¿½
+                var xmlPath = Path.Combine (basePath, "BlogDemo.Api.xml");
+                a.IncludeXmlComments (xmlPath, true);
 
-                //¶ÁÈ¡Model-XML×¢ÊÍÎÄµµ
-                var xmlModelPath = Path.Combine(basePath, "BlogDemo.Core.Model.xml");
-                a.IncludeXmlComments(xmlModelPath, true);
+                //ï¿½ï¿½È¡Model-XML×¢ï¿½ï¿½ï¿½Äµï¿½
+                var xmlModelPath = Path.Combine (basePath, "BlogDemo.Core.Model.xml");
+                a.IncludeXmlComments (xmlModelPath, true);
 
+                #region ï¿½ï¿½ï¿½ï¿½JWT
 
-                #region Ìí¼ÓJWT
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¨Ð¡ï¿½ï¿½
+                a.OperationFilter<AddResponseHeadersFilter> ();
+                a.OperationFilter<AppendAuthorizeToSummaryOperationFilter> ();
 
-                //¿ªÆô¼ÓÈ¨Ð¡Ëø
-                a.OperationFilter<AddResponseHeadersFilter>();
-                a.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
+                //ï¿½ï¿½headerï¿½ï¿½ï¿½ï¿½ï¿½ï¿½tokenï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½Ì¨
+                a.OperationFilter<SecurityRequirementsOperationFilter> ();
 
-                //ÔÚheaderÖÐÌí¼Ótoken£¬´«µÝµ½ºóÌ¨
-                a.OperationFilter<SecurityRequirementsOperationFilter>();
-
-                // ±ØÐëÊÇ oauth2
-                a.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-                {
-                    Description = "JWTÊÚÈ¨(Êý¾Ý½«ÔÚÇëÇóÍ·ÖÐ½øÐÐ´«Êä) Ö±½ÓÔÚÏÂ¿òÖÐÊäÈë Bearer {token} £¨×¢ÒâÁ½ÕßÖ®¼äÊÇÒ»¸ö¿Õ¸ñ£©",
-                    Name = "Authorization", //JWTÄ¬ÈÏµÄ²ÎÊýÃû³Æ
-                    In = ParameterLocation.Header, //jwtÄ¬ÈÏ´æ·Å Authorization ÐÅÏ¢Î»ÖÃ£¨ÇëÇóÍ·ÖÐ£©
-                    Type = SecuritySchemeType.ApiKey
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ oauth2
+                a.AddSecurityDefinition ("oauth2", new OpenApiSecurityScheme {
+                    Description = "JWTï¿½ï¿½È¨(ï¿½ï¿½ï¿½Ý½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ð½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½) Ö±ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Bearer {token} ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Õ¸ï¿½",
+                        Name = "Authorization", //JWTÄ¬ï¿½ÏµÄ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                        In = ParameterLocation.Header, //jwtÄ¬ï¿½Ï´ï¿½ï¿½ Authorization ï¿½ï¿½Ï¢Î»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ð£ï¿½
+                        Type = SecuritySchemeType.ApiKey
                 });
                 #endregion
 
             });
 
-
             #endregion
 
             #region GlobalExceptions
 
-            //×¢ÈëÈ«¾ÖÒì³£²¶»ñ
-            services.AddControllers(a =>
-            {
-                a.Filters.Add(typeof(GlobalExceptionsFilter));
+            //×¢ï¿½ï¿½È«ï¿½ï¿½ï¿½ì³£ï¿½ï¿½ï¿½ï¿½
+            services.AddControllers (a => {
+                a.Filters.Add (typeof (GlobalExceptionsFilter));
             });
 
             #endregion
 
-            #region JWT¹Ù·½ÊÚÈ¨ÈÏÖ¤
+            #region JWTï¿½Ù·ï¿½ï¿½ï¿½È¨ï¿½ï¿½Ö¤
 
-            #region ¡¾µÚÒ»²½¡¿£ºAPI½Ó¿ÚÊÚÈ¨²ßÂÔ
-            //1.1 ²ßÂÔ
-            services.AddAuthorization(option =>
-            {
-                option.AddPolicy("Client", policy => policy.RequireRole("Client").Build());
-                option.AddPolicy("Admin", policy => policy.RequireRole("Admin").Build());
-                option.AddPolicy("SystemOrAdmin", policy => policy.RequireRole("System", "Admin"));
-                option.AddPolicy("SystemAndAdmin", policy => policy.RequireRole("IncludeXmlCommentsSystem").RequireRole("Admin"));
+            #region ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½APIï¿½Ó¿ï¿½ï¿½ï¿½È¨ï¿½ï¿½ï¿½ï¿½
+            //1.1 ï¿½ï¿½ï¿½ï¿½
+            services.AddAuthorization (option => {
+                option.AddPolicy ("Client", policy => policy.RequireRole ("Client").Build ());
+                option.AddPolicy ("Admin", policy => policy.RequireRole ("Admin").Build ());
+                option.AddPolicy ("SystemOrAdmin", policy => policy.RequireRole ("System", "Admin"));
+                option.AddPolicy ("SystemAndAdmin", policy => policy.RequireRole ("IncludeXmlCommentsSystem").RequireRole ("Admin"));
             });
 
             #endregion
 
-            #region ²ÎÊý
-            var audienceConfig = Configuration.GetSection("Audience"); //¶ÁÈ¡AppSettingsÅäÖÃ½Úµã
-            var symmetricKeyAsBase64 = AppSecretConfig.Audience_Secret_String;//Ë½Ô¿
-            var keyByteArray = Encoding.ASCII.GetBytes(symmetricKeyAsBase64);
-            var signingKey = new SymmetricSecurityKey(keyByteArray);
+            #region ï¿½ï¿½ï¿½ï¿½
+            var audienceConfig = Configuration.GetSection ("Audience"); //ï¿½ï¿½È¡AppSettingsï¿½ï¿½ï¿½Ã½Úµï¿½
+            var symmetricKeyAsBase64 = AppSecretConfig.Audience_Secret_String; //Ë½Ô¿
+            var keyByteArray = Encoding.ASCII.GetBytes (symmetricKeyAsBase64);
+            var signingKey = new SymmetricSecurityKey (keyByteArray);
             #endregion
 
-            #region ¡¾µÚ¶þ²½¡¿£ºÅäÖÃÈÏÖ¤·þÎñ
+            #region ï¿½ï¿½ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½
 
-            //ÅäÖÃÁîÅÆÑéÖ¤²ÎÊý
-            var tokenValidationParameters = new TokenValidationParameters
-            {
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½
+            var tokenValidationParameters = new TokenValidationParameters {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = signingKey,
                 ValidateIssuer = true,
-                ValidIssuer = audienceConfig["Issuer"], //·¢ÐÐÈË
+                ValidIssuer = audienceConfig["Issuer"], //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 ValidateAudience = true,
-                ValidAudience = audienceConfig["Audience"], //¶©ÔÄÈË
+                ValidAudience = audienceConfig["Audience"], //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromSeconds(30),
+                ClockSkew = TimeSpan.FromSeconds (30),
                 RequireExpirationTime = true,
             };
 
-            //2.1 ¡¾ÈÏÖ¤¡¿ Core×Ô´ø¹Ù·½JWTÈÏÖ¤
-            //¿ªÊ¼BearerÉí·ÝÈÏÖ¤
-            services.AddAuthentication("Bearer")
-                //Ìí¼ÓBearer·þÎñ
-                .AddJwtBearer(a =>
-            {
-                a.TokenValidationParameters = tokenValidationParameters;
-                a.Events = new JwtBearerEvents
-                {
-                    OnAuthenticationFailed = context =>
-                    {
-                        //Èç¹û¹ýÆÚ£¬Ôò°Ñ<ÊÇ·ñ¹ýÆÚ>Ìí¼Óµ½£¬·µ»ØÍ·ÐÅÏ¢ÖÐ    [°²È«ÁîÅÆ¹ýÆÚÒì³£]
-                        if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-                        {
-                            context.Response.Headers.Add("Token-Expired", "true");
+            //2.1 ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ Coreï¿½Ô´ï¿½ï¿½Ù·ï¿½JWTï¿½ï¿½Ö¤
+            //ï¿½ï¿½Ê¼Bearerï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤
+            services.AddAuthentication ("Bearer")
+                //ï¿½ï¿½ï¿½ï¿½Bearerï¿½ï¿½ï¿½ï¿½
+                .AddJwtBearer (a => {
+                    a.TokenValidationParameters = tokenValidationParameters;
+                    a.Events = new JwtBearerEvents {
+                        OnAuthenticationFailed = context => {
+                            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½<ï¿½Ç·ï¿½ï¿½ï¿½ï¿½>ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Ï¢ï¿½ï¿½    [ï¿½ï¿½È«ï¿½ï¿½ï¿½Æ¹ï¿½ï¿½ï¿½ï¿½ì³£]
+                            if (context.Exception.GetType () == typeof (SecurityTokenExpiredException)) {
+                                context.Response.Headers.Add ("Token-Expired", "true");
+                            }
+                            return Task.CompletedTask;
                         }
-                        return Task.CompletedTask;
-                    }
-                };
-            });
-
+                    };
+                });
 
             #endregion
 
             #endregion
 
-
-            //Ö¸¶¨Êý¾Ý¿âÉÏÏÂÎÄ½«Ê¹ÓÃÄÚ´æÖÐÊý¾Ý¿â
+            //Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½Ê¹ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½
             //services.AddDbContext<TodoContext>(opt =>
-            //    opt.UseInMemoryDatabase("TodoList"));  //UseInMemoryDatabase  Ìí¼ÓNuget  Microsoft.EntityFrameworkCore.InMemory
+            //    opt.UseInMemoryDatabase("TodoList"));  //UseInMemoryDatabase  ï¿½ï¿½ï¿½ï¿½Nuget  Microsoft.EntityFrameworkCore.InMemory
 
-            services.AddControllers();
+            services.AddControllers ();
         }
 
         /// <summary>
-        ///  ÐÂÔö·þÎñ ×¢Èëµ½Autofac ÈÝÆ÷
+        ///  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ×¢ï¿½ëµ½Autofac ï¿½ï¿½ï¿½ï¿½
         /// </summary>
         /// <param name="builder"></param>
-        public void ConfigureContainer(ContainerBuilder builder)
-        {
-            //»ñÈ¡³ÌÐò¼¯¸úÄ¿Â¼ --Ìí¼Ó Microsoft.DotNet.PlatformAbstractions Nuget°ü
+        public void ConfigureContainer (ContainerBuilder builder) {
+            //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ò¼¯¸ï¿½Ä¿Â¼ --ï¿½ï¿½ï¿½ï¿½ Microsoft.DotNet.PlatformAbstractions Nugetï¿½ï¿½
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
 
             #region AOP
 
-            //×¢²áÒªÍ¨¹ý·´Éä´´½¨µÄ×é¼þ
-            builder.RegisterType<BlogLogAOP>(); //À¹½ØÆ÷½øÐÐ×¢²á
-            builder.RegisterType<BlogCacheAOP>();
+            //×¢ï¿½ï¿½ÒªÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½ä´´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            builder.RegisterType<BlogLogAOP> (); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½
+            builder.RegisterType<BlogCacheAOP> ();
 
             #endregion
 
-            #region ´øÓÐ½Ó¿Ú²ãµÄ·þÎñ×¢Èë
+            #region ï¿½ï¿½ï¿½Ð½Ó¿Ú²ï¿½Ä·ï¿½ï¿½ï¿½×¢ï¿½ï¿½
 
-            var servicesDllFile = Path.Combine(basePath, "BlogDemo.Core.Service.dll");
+            var servicesDllFile = Path.Combine (basePath, "BlogDemo.Core.Service.dll");
 
-            var assemblysServices = Assembly.LoadFile(servicesDllFile);
+            var assemblysServices = Assembly.LoadFile (servicesDllFile);
 
-            builder.RegisterAssemblyTypes(assemblysServices)
-               .AsImplementedInterfaces()
-               .InstancePerLifetimeScope()
-               .EnableInterfaceInterceptors()
-               .InterceptedBy(typeof(BlogLogAOP), typeof(BlogCacheAOP)); //¿ÉÒÔ·ÅÒ»¸öAOPÀ¹½ØÆ÷¼¯ºÏ
+            builder.RegisterAssemblyTypes (assemblysServices)
+                .AsImplementedInterfaces ()
+                .InstancePerLifetimeScope ()
+                .EnableInterfaceInterceptors ()
+                .InterceptedBy (typeof (BlogLogAOP), typeof (BlogCacheAOP)); //ï¿½ï¿½ï¿½Ô·ï¿½Ò»ï¿½ï¿½AOPï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-            var repositoryDllFile = Path.Combine(basePath, "BlogDemo.Core.Repository.dll");
-            var assemblysRepository = Assembly.LoadFrom(repositoryDllFile);
-            builder.RegisterAssemblyTypes(assemblysRepository).AsImplementedInterfaces();
+            var repositoryDllFile = Path.Combine (basePath, "BlogDemo.Core.Repository.dll");
+            var assemblysRepository = Assembly.LoadFrom (repositoryDllFile);
+            builder.RegisterAssemblyTypes (assemblysRepository).AsImplementedInterfaces ();
 
             #endregion
 
         }
 
-        //¹ÜµÀ£¨ÖÐ¼ä¼þ£©¡¾¾ßÌåÖ¸¶¨ÈçºÎ´¦ÀíÃ¿¸öhttpÇëÇó¡¿
+        //ï¿½Üµï¿½ï¿½ï¿½ï¿½Ð¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½httpï¿½ï¿½ï¿½ï¿½
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
+        public void Configure (IApplicationBuilder app, IWebHostEnvironment env) {
+            if (env.IsDevelopment ()) {
+                app.UseDeveloperExceptionPage ();
             }
-
 
             #region Swagger
 
-            app.UseSwagger();
+            app.UseSwagger ();
 
-            app.UseSwaggerUI(c =>
-            {
-                typeof(ApiVersions).GetEnumNames().OrderByDescending(e => e).ToList().ForEach(versions =>
-                {
-                    c.SwaggerEndpoint($"/swagger/{versions}/swagger.json", $"{ApiName}  {versions}");
+            app.UseSwaggerUI (c => {
+                typeof (ApiVersions).GetEnumNames ().OrderByDescending (e => e).ToList ().ForEach (versions => {
+                    c.SwaggerEndpoint ($"/swagger/{versions}/swagger.json", $"{ApiName}  {versions}");
                 });
 
                 c.RoutePrefix = "";
-                c.IndexStream = () => GetType().GetTypeInfo().Assembly.GetManifestResourceStream("BlogDemo.Api.index.html");
+                c.IndexStream = () => GetType ().GetTypeInfo ().Assembly.GetManifestResourceStream ("BlogDemo.Api.index.html");
             });
 
             #endregion
 
-            //×Ô¶¨ÒåÈÏÖ¤ÖÐ¼ä¼þ
+            //ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½Ð¼ï¿½ï¿½
             //app.UseMiddleware<JwtTokenAuth>();
 
-            app.UseMiniProfiler();
+            app.UseMiniProfiler ();
 
+            app.UseHttpsRedirection ();
 
-            app.UseHttpsRedirection();
+            app.UseStaticFiles (); //ï¿½ï¿½È¡ï¿½ï¿½Ì¬ï¿½Ä¼ï¿½ wwwroot
 
-            app.UseStaticFiles(); //¶ÁÈ¡¾²Ì¬ÎÄ¼þ wwwroot
+            app.UseRouting ();
 
-            app.UseRouting();
+            //ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ app.UserMvc() ï¿½ï¿½ï¿½ï¿½ app.UseHttpsRedirection()ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¼ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Òªï¿½ï¿½ app.UseCors() Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Çµï¿½ï¿½Ï±ß£ï¿½ï¿½È½ï¿½ï¿½Ð¿ï¿½ï¿½ï¿½ï¿½Ù½ï¿½ï¿½ï¿½ Http ï¿½ï¿½ï¿½ó£¬·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ê§ï¿½Ü¡ï¿½
+            //ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ¼°ï¿½ï¿½ Httpï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ã²»ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mvcï¿½ï¿½ï¿½Ç¿Ï¶ï¿½ï¿½ï¿½ï¿½ï¿½
+            app.UseCors ("LimitRequests");
 
-            //Èç¹ûÄãÊ¹ÓÃÁË app.UserMvc() »òÕß app.UseHttpsRedirection()ÕâÀàµÄÖÐ¼ä¼þ£¬Ò»¶¨Òª°Ñ app.UseCors() Ð´ÔÚËüÃÇµÄÉÏ±ß£¬ÏÈ½øÐÐ¿çÓò£¬ÔÙ½øÐÐ Http ÇëÇó£¬·ñÔò»áÌáÊ¾¿çÓòÊ§°Ü¡£
-            //ÒòÎªÕâÁ½¸ö¶¼ÊÇÉæ¼°µ½ HttpÇëÇóµÄ£¬Èç¹ûÄã²»¿çÓò¾ÍÖ±½Ó×ª·¢»òÕßmvc£¬ÄÇ¿Ï¶¨±¨´í
-            app.UseCors("LimitRequests");
-
-
-            #region ¡¾µÚÈý²½¡¿£º¿ªÆôÖÐ¼ä¼þ
-            //Éí·ÝÑéÖ¤  Èç¹ûÄãÏëÊ¹ÓÃ¹Ù·½ÈÏÖ¤£¬±ØÐëÔÚÉÏ±ßConfigureService ÖÐ£¬ÅäÖÃJWTµÄÈÏÖ¤·þÎñ (.AddAuthentication ºÍ .AddJwtBearer ¶þÕßÈ±Ò»²»¿É)
-            app.UseAuthentication();
+            #region ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¼ï¿½ï¿½
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ã¹Ù·ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ConfigureService ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½JWTï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ (.AddAuthentication ï¿½ï¿½ .AddJwtBearer ï¿½ï¿½ï¿½ï¿½È±Ò»ï¿½ï¿½ï¿½ï¿½)
+            app.UseAuthentication ();
             #endregion
 
+            //ï¿½ï¿½È¨
+            app.UseAuthorization ();
 
-            //ÊÚÈ¨
-            app.UseAuthorization();
-
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
+            app.UseEndpoints (endpoints => {
+                endpoints.MapControllers ();
             });
         }
     }

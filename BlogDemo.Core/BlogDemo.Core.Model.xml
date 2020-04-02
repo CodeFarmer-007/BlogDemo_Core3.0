@@ -4,26 +4,6 @@
         <name>BlogDemo.Core.Model</name>
     </assembly>
     <members>
-        <member name="T:BlogDemo.Core.Model.MessageModel`1">
-            <summary>
-            通用返回信息类
-            </summary>
-        </member>
-        <member name="P:BlogDemo.Core.Model.MessageModel`1.success">
-            <summary>
-            操作是否成功
-            </summary>
-        </member>
-        <member name="P:BlogDemo.Core.Model.MessageModel`1.msg">
-            <summary>
-            返回信息
-            </summary>
-        </member>
-        <member name="P:BlogDemo.Core.Model.MessageModel`1.response">
-            <summary>
-            返回数据集合
-            </summary>
-        </member>
         <member name="T:BlogDemo.Core.Model.Models.GllyERP.ProductManagement">
             <summary>
             产品管理
@@ -184,19 +164,29 @@
             返回数据
             </summary>
         </member>
-        <member name="F:BlogDemo.Core.Model.ResponseEnum.NoPermissions">
+        <member name="T:BlogDemo.Core.Model.ResponseRsp`1">
             <summary>
-            无权限
+            通用返回信息类
             </summary>
         </member>
-        <member name="F:BlogDemo.Core.Model.ResponseEnum.NoFound">
+        <member name="P:BlogDemo.Core.Model.ResponseRsp`1.ReurnCode">
             <summary>
-            找不到指定资源
+            返回状态
             </summary>
         </member>
-        <member name="F:BlogDemo.Core.Model.ResponseEnum.ServerError">
+        <member name="P:BlogDemo.Core.Model.ResponseRsp`1.Message">
             <summary>
-            找不到指定资源
+            返回消息
+            </summary>
+        </member>
+        <member name="P:BlogDemo.Core.Model.ResponseRsp`1.Data">
+            <summary>
+            数据信息
+            </summary>
+        </member>
+        <member name="T:BlogDemo.Core.Model.ReturnCode">
+            <summary>
+            返回Code枚举
             </summary>
         </member>
         <member name="T:BlogDemo.Core.Model.TableModel`1">

@@ -1,12 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
-namespace BlogDemo.Api.Models
-{
-    public class TodoContext : DbContext
-    {
-        public TodoContext(DbContextOptions<TodoContext> options)
-            : base(options)
-        {
+namespace BlogDemo.Api.Models {
+    public class TodoContext : DbContext {
+        public TodoContext (DbContextOptions<TodoContext> options) : base (options) {
 
         }
 

@@ -19,10 +19,5 @@ namespace BlogDemo.Core.Service
             _dal = dal;
             base.BaseDal = dal;
         }
-
-        public Task<ProductManagement> GetProductAsync()
-        {
-            
-        }
     }
 }

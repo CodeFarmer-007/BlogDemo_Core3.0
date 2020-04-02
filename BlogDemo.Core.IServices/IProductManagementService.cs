@@ -9,6 +9,5 @@ namespace BlogDemo.Core.IService
 {
     public interface IProductManagementService : IBaseServices<ProductManagement>
     {
-        Task<ProductManagement> GetProductAsync();
     }
 }
