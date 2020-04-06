@@ -1,300 +1,335 @@
-using System;
-using System.IO;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Autofac;
-using Autofac.Extras.DynamicProxy;
-using BlogDemo.Api.AOP;
-using BlogDemo.Api.AuthHelper;
-using BlogDemo.Api.Filter;
 using BlogDemo.Api.Models;
-using BlogDemo.Core.Common.DB;
-using BlogDemo.Core.Common.Helper;
-using BlogDemo.Core.Common.LogHelper;
-using BlogDemo.Core.Common.MemoryCache;
-using BlogDemo.Core.Common.Redis;
-using BlogDemo.Core.IService;
-using BlogDemo.Core.Service;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.IO;
+using BlogDemo.Core.Common.DB;
+using System.Reflection;
+using Autofac;
+using Autofac.Extras.DynamicProxy;
+using BlogDemo.Core.Service;
+using BlogDemo.Core.IService;
+using BlogDemo.Api.AOP;
+using BlogDemo.Core.Common.MemoryCache;
+using Microsoft.Extensions.Caching.Memory;
+using BlogDemo.Core.Common.Redis;
 using StackExchange.Profiling.Storage;
+using System;
+using BlogDemo.Api.AuthHelper;
 using Swashbuckle.AspNetCore.Filters;
+using BlogDemo.Core.Common.Helper;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Threading.Tasks;
+using BlogDemo.Api.Filter;
+using Microsoft.Extensions.Logging;
+using BlogDemo.Core.Common.LogHelper;
 using static BlogDemo.Api.SwaggerHelper.CustomApiVersion;
 using System.Linq;
 
-namespace BlogDemo.Api {
+namespace BlogDemo.Api
+{
     /// <summary>
-    /// �����ļ����� ������ע�룬��������Redis����ȡ�
+    /// 启动文件配置 【依赖注入，跨域请求，Redis缓存等】
     /// </summary>
-    public class Startup {
+    public class Startup
+    {
         public IConfiguration Configuration { get; }
 
-        //��ȡAppSettings.json
+        //读取AppSettings.json
         public IWebHostEnvironment Env { get; }
 
         public string ApiName { get; set; } = "Blog.Api";
 
-        public Startup (IConfiguration configuration, IWebHostEnvironment env) {
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        {
             Configuration = configuration;
 
-            //��ȡAppSettings.json
+            //读取AppSettings.json
             Env = env;
         }
 
-        //ע�����
+        //注册服务
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices (IServiceCollection services) {
-            //��ȡ���򼯸�Ŀ¼ --���� Microsoft.DotNet.PlatformAbstractions Nuget��
+        public void ConfigureServices(IServiceCollection services)
+        {
+            //获取程序集跟目录 --添加 Microsoft.DotNet.PlatformAbstractions Nuget包
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
 
-            //��ȡAppSettings.json
-            services.AddSingleton (new Appsettings (Env.ContentRootPath));
+            //读取AppSettings.json
+            services.AddSingleton(new Appsettings(Env.ContentRootPath));
+
 
             #region CROS
-            services.AddCors (a => {
-                //���ò���    �������� 
-                a.AddPolicy ("LimitRequests", policy => {
-                    // ֧�ֶ�������˿ڣ�ע��˿ںź�Ҫ��/б�ˣ�����localhost:8000/���Ǵ���
-                    // http://127.0.0.1:1818 �� http://localhost:1818 �ǲ�һ���ģ�����д����
-                    policy.WithOrigins ("http://localhost:753")
-                        .AllowAnyHeader ().AllowAnyMethod ();
+            services.AddCors(a =>
+            {
+                //配置策略    限制请求 
+                a.AddPolicy("LimitRequests", policy =>
+                {
+                    // 支持多个域名端口，注意端口号后不要带/斜杆：比如localhost:8000/，是错的
+                    // http://127.0.0.1:1818 和 http://localhost:1818 是不一样的，尽量写两个
+                    policy.WithOrigins("http://localhost:753")
+                    .AllowAnyHeader().AllowAnyMethod();
                 });
             });
             #endregion
 
-            #region ��������� MiniProfiler
+            #region 代码分析器 MiniProfiler
 
-            services.AddMiniProfiler (options => {
-                options.RouteBasePath = "/profiler"; //ע�����·��Ҫ���±� index.html �ű������е�һ��
-                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes (10);
+            services.AddMiniProfiler(options =>
+            {
+                options.RouteBasePath = "/profiler";   //注意这个路径要和下边 index.html 脚本配置中的一致
+                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(10);
             });
 
             #endregion
 
-            #region ���������ע��
-            // ����ע��
-            services.AddScoped<ICaching, MemoryCaching> ();
-            services.AddSingleton<IMemoryCache> (factory => {
-                var cache = new MemoryCache (new MemoryCacheOptions ());
+            #region 工具类服务注入
+            // 缓存注入
+            services.AddScoped<ICaching, MemoryCaching>();
+            services.AddSingleton<IMemoryCache>(factory =>
+            {
+                var cache = new MemoryCache(new MemoryCacheOptions());
                 return cache;
             });
 
-            // Redisע��
-            services.AddScoped<IRedisCacheManager, RedisCacheManager> ();
+            // Redis注入
+            services.AddScoped<IRedisCacheManager, RedisCacheManager>();
 
             #endregion
 
-            #region Swagger����
+            #region Swagger配置
 
-            //����Swagger
-            services.AddSwaggerGen (a => {
-                //�汾����
-                typeof (ApiVersions).GetEnumNames ().ToList ().ForEach (version => {
-                    a.SwaggerDoc (version, new OpenApiInfo {
+            //配置Swagger
+            services.AddSwaggerGen(a =>
+            {
+                //版本控制
+                typeof(ApiVersions).GetEnumNames().ToList().ForEach(version =>
+                {
+                    a.SwaggerDoc(version, new OpenApiInfo
+                    {
                         Version = version,
-                            Title = $"{ApiName}�ӿ��ĵ�--Core 3.1",
-                            Description = $"{ApiName} Http Api {version}",
-                            Contact = new OpenApiContact { Name = ApiName, Url = new System.Uri ("https://www.jianshu.com/u/94102b59cc2a"), Email = "229318442@qq.com" },
-                            License = new OpenApiLicense { Name = ApiName, Url = new System.Uri ("https://github.com/CodeFarmer-007/BlogDemo_Core3.0") }
+                        Title = $"{ApiName}接口文档--Core 3.1",
+                        Description = $"{ApiName} Http Api {version}",
+                        Contact = new OpenApiContact { Name = ApiName, Url = new System.Uri("https://www.jianshu.com/u/94102b59cc2a"), Email = "229318442@qq.com" },
+                        License = new OpenApiLicense { Name = ApiName, Url = new System.Uri("https://github.com/CodeFarmer-007/BlogDemo_Core3.0") }
                     });
-                    a.OrderActionsBy (o => o.RelativePath);
+                    a.OrderActionsBy(o => o.RelativePath);
                 });
 
-                //��ȡApi-XMLע���ĵ�
-                var xmlPath = Path.Combine (basePath, "BlogDemo.Api.xml");
-                a.IncludeXmlComments (xmlPath, true);
+                //读取Api-XML注释文档
+                var xmlPath = Path.Combine(basePath, "BlogDemo.Api.xml");
+                a.IncludeXmlComments(xmlPath, true);
 
-                //��ȡModel-XMLע���ĵ�
-                var xmlModelPath = Path.Combine (basePath, "BlogDemo.Core.Model.xml");
-                a.IncludeXmlComments (xmlModelPath, true);
+                //读取Model-XML注释文档
+                var xmlModelPath = Path.Combine(basePath, "BlogDemo.Core.Model.xml");
+                a.IncludeXmlComments(xmlModelPath, true);
 
-                #region ����JWT
 
-                //������ȨС��
-                a.OperationFilter<AddResponseHeadersFilter> ();
-                a.OperationFilter<AppendAuthorizeToSummaryOperationFilter> ();
+                #region 添加JWT
 
-                //��header������token�����ݵ���̨
-                a.OperationFilter<SecurityRequirementsOperationFilter> ();
+                //开启加权小锁
+                a.OperationFilter<AddResponseHeadersFilter>();
+                a.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
 
-                // ������ oauth2
-                a.AddSecurityDefinition ("oauth2", new OpenApiSecurityScheme {
-                    Description = "JWT��Ȩ(���ݽ�������ͷ�н��д���) ֱ�����¿������� Bearer {token} ��ע������֮����һ���ո�",
-                        Name = "Authorization", //JWTĬ�ϵĲ�������
-                        In = ParameterLocation.Header, //jwtĬ�ϴ�� Authorization ��Ϣλ�ã�����ͷ�У�
-                        Type = SecuritySchemeType.ApiKey
+                //在header中添加token，传递到后台
+                a.OperationFilter<SecurityRequirementsOperationFilter>();
+
+                // 必须是 oauth2
+                a.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    Description = "JWT授权(数据将在请求头中进行传输) 直接在下框中输入 Bearer {token} （注意两者之间是一个空格）",
+                    Name = "Authorization", //JWT默认的参数名称
+                    In = ParameterLocation.Header, //jwt默认存放 Authorization 信息位置（请求头中）
+                    Type = SecuritySchemeType.ApiKey
                 });
                 #endregion
 
             });
 
+
             #endregion
 
             #region GlobalExceptions
 
-            //ע��ȫ���쳣����
-            services.AddControllers (a => {
-                a.Filters.Add (typeof (GlobalExceptionsFilter));
+            //注入全局异常捕获
+            services.AddControllers(a =>
+            {
+                a.Filters.Add(typeof(GlobalExceptionsFilter));
             });
 
             #endregion
 
-            #region JWT�ٷ���Ȩ��֤
+            #region JWT官方授权认证
 
-            #region ����һ������API�ӿ���Ȩ����
-            //1.1 ����
-            services.AddAuthorization (option => {
-                option.AddPolicy ("Client", policy => policy.RequireRole ("Client").Build ());
-                option.AddPolicy ("Admin", policy => policy.RequireRole ("Admin").Build ());
-                option.AddPolicy ("SystemOrAdmin", policy => policy.RequireRole ("System", "Admin"));
-                option.AddPolicy ("SystemAndAdmin", policy => policy.RequireRole ("IncludeXmlCommentsSystem").RequireRole ("Admin"));
+            #region 【第一步】：API接口授权策略
+            //1.1 策略
+            services.AddAuthorization(option =>
+            {
+                option.AddPolicy("Client", policy => policy.RequireRole("Client").Build());
+                option.AddPolicy("Admin", policy => policy.RequireRole("Admin").Build());
+                option.AddPolicy("SystemOrAdmin", policy => policy.RequireRole("System", "Admin"));
+                option.AddPolicy("SystemAndAdmin", policy => policy.RequireRole("IncludeXmlCommentsSystem").RequireRole("Admin"));
             });
 
             #endregion
 
-            #region ����
-            var audienceConfig = Configuration.GetSection ("Audience"); //��ȡAppSettings���ýڵ�
-            var symmetricKeyAsBase64 = AppSecretConfig.Audience_Secret_String; //˽Կ
-            var keyByteArray = Encoding.ASCII.GetBytes (symmetricKeyAsBase64);
-            var signingKey = new SymmetricSecurityKey (keyByteArray);
+            #region 参数
+            var audienceConfig = Configuration.GetSection("Audience"); //读取AppSettings配置节点
+            var symmetricKeyAsBase64 = AppSecretConfig.Audience_Secret_String;//私钥
+            var keyByteArray = Encoding.ASCII.GetBytes(symmetricKeyAsBase64);
+            var signingKey = new SymmetricSecurityKey(keyByteArray);
             #endregion
 
-            #region ���ڶ�������������֤����
+            #region 【第二步】：配置认证服务
 
-            //����������֤����
-            var tokenValidationParameters = new TokenValidationParameters {
+            //配置令牌验证参数
+            var tokenValidationParameters = new TokenValidationParameters
+            {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = signingKey,
                 ValidateIssuer = true,
-                ValidIssuer = audienceConfig["Issuer"], //������
+                ValidIssuer = audienceConfig["Issuer"], //发行人
                 ValidateAudience = true,
-                ValidAudience = audienceConfig["Audience"], //������
+                ValidAudience = audienceConfig["Audience"], //订阅人
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromSeconds (30),
+                ClockSkew = TimeSpan.FromSeconds(30),
                 RequireExpirationTime = true,
             };
 
-            //2.1 ����֤�� Core�Դ��ٷ�JWT��֤
-            //��ʼBearer������֤
-            services.AddAuthentication ("Bearer")
-                //����Bearer����
-                .AddJwtBearer (a => {
+            //2.1 【认证】 Core自带官方JWT认证
+            //开始Bearer身份认证
+            services.AddAuthentication("Bearer")
+                //添加Bearer服务
+                .AddJwtBearer(a =>
+                {
                     a.TokenValidationParameters = tokenValidationParameters;
-                    a.Events = new JwtBearerEvents {
-                        OnAuthenticationFailed = context => {
-                            //������ڣ����<�Ƿ����>���ӵ�������ͷ��Ϣ��    [��ȫ���ƹ����쳣]
-                            if (context.Exception.GetType () == typeof (SecurityTokenExpiredException)) {
-                                context.Response.Headers.Add ("Token-Expired", "true");
+                    a.Events = new JwtBearerEvents
+                    {
+                        OnAuthenticationFailed = context =>
+                        {
+                            //如果过期，则把<是否过期>添加到，返回头信息中    [安全令牌过期异常]
+                            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                            {
+                                context.Response.Headers.Add("Token-Expired", "true");
                             }
                             return Task.CompletedTask;
                         }
                     };
                 });
 
-            #endregion
 
             #endregion
 
-            //ָ�����ݿ������Ľ�ʹ���ڴ������ݿ�
+            #endregion
+
+
+            //指定数据库上下文将使用内存中数据库
             //services.AddDbContext<TodoContext>(opt =>
-            //    opt.UseInMemoryDatabase("TodoList"));  //UseInMemoryDatabase  ����Nuget  Microsoft.EntityFrameworkCore.InMemory
+            //    opt.UseInMemoryDatabase("TodoList"));  //UseInMemoryDatabase  添加Nuget  Microsoft.EntityFrameworkCore.InMemory
 
-            services.AddControllers ();
+            services.AddControllers();
         }
 
         /// <summary>
-        ///  �������� ע�뵽Autofac ����
+        ///  新增服务 注入到Autofac 容器
         /// </summary>
         /// <param name="builder"></param>
-        public void ConfigureContainer (ContainerBuilder builder) {
-            //��ȡ���򼯸�Ŀ¼ --���� Microsoft.DotNet.PlatformAbstractions Nuget��
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            //获取程序集跟目录 --添加 Microsoft.DotNet.PlatformAbstractions Nuget包
             var basePath = Microsoft.DotNet.PlatformAbstractions.ApplicationEnvironment.ApplicationBasePath;
 
             #region AOP
 
-            //ע��Ҫͨ�����䴴�������
-            builder.RegisterType<BlogLogAOP> (); //����������ע��
-            builder.RegisterType<BlogCacheAOP> ();
+            //注册要通过反射创建的组件
+            builder.RegisterType<BlogLogAOP>(); //拦截器进行注册
+            builder.RegisterType<BlogCacheAOP>();
 
             #endregion
 
-            #region ���нӿڲ�ķ���ע��
+            #region 带有接口层的服务注入
 
-            var servicesDllFile = Path.Combine (basePath, "BlogDemo.Core.Service.dll");
+            var servicesDllFile = Path.Combine(basePath, "BlogDemo.Core.Service.dll");
 
-            var assemblysServices = Assembly.LoadFile (servicesDllFile);
+            var assemblysServices = Assembly.LoadFile(servicesDllFile);
 
-            builder.RegisterAssemblyTypes (assemblysServices)
-                .AsImplementedInterfaces ()
-                .InstancePerLifetimeScope ()
-                .EnableInterfaceInterceptors ()
-                .InterceptedBy (typeof (BlogLogAOP), typeof (BlogCacheAOP)); //���Է�һ��AOP����������
+            builder.RegisterAssemblyTypes(assemblysServices)
+               .AsImplementedInterfaces()
+               .InstancePerLifetimeScope()
+               .EnableInterfaceInterceptors()
+               .InterceptedBy(typeof(BlogLogAOP), typeof(BlogCacheAOP)); //可以放一个AOP拦截器集合
 
-            var repositoryDllFile = Path.Combine (basePath, "BlogDemo.Core.Repository.dll");
-            var assemblysRepository = Assembly.LoadFrom (repositoryDllFile);
-            builder.RegisterAssemblyTypes (assemblysRepository).AsImplementedInterfaces ();
+            var repositoryDllFile = Path.Combine(basePath, "BlogDemo.Core.Repository.dll");
+            var assemblysRepository = Assembly.LoadFrom(repositoryDllFile);
+            builder.RegisterAssemblyTypes(assemblysRepository).AsImplementedInterfaces();
 
             #endregion
 
         }
 
-        //�ܵ����м����������ָ����δ���ÿ��http����
+        //管道（中间件）【具体指定如何处理每个http请求】
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure (IApplicationBuilder app, IWebHostEnvironment env) {
-            if (env.IsDevelopment ()) {
-                app.UseDeveloperExceptionPage ();
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
             }
+
 
             #region Swagger
 
-            app.UseSwagger ();
+            app.UseSwagger();
 
-            app.UseSwaggerUI (c => {
-                typeof (ApiVersions).GetEnumNames ().OrderByDescending (e => e).ToList ().ForEach (versions => {
-                    c.SwaggerEndpoint ($"/swagger/{versions}/swagger.json", $"{ApiName}  {versions}");
+            app.UseSwaggerUI(c =>
+            {
+                typeof(ApiVersions).GetEnumNames().OrderByDescending(e => e).ToList().ForEach(versions =>
+                {
+                    c.SwaggerEndpoint($"/swagger/{versions}/swagger.json", $"{ApiName}  {versions}");
                 });
 
                 c.RoutePrefix = "";
-                c.IndexStream = () => GetType ().GetTypeInfo ().Assembly.GetManifestResourceStream ("BlogDemo.Api.index.html");
+                c.IndexStream = () => GetType().GetTypeInfo().Assembly.GetManifestResourceStream("BlogDemo.Api.index.html");
             });
 
             #endregion
 
-            //�Զ�����֤�м��
+            //自定义认证中间件
             //app.UseMiddleware<JwtTokenAuth>();
 
-            app.UseMiniProfiler ();
+            app.UseMiniProfiler();
 
-            app.UseHttpsRedirection ();
 
-            app.UseStaticFiles (); //��ȡ��̬�ļ� wwwroot
+            app.UseHttpsRedirection();
 
-            app.UseRouting ();
+            app.UseStaticFiles(); //读取静态文件 wwwroot
 
-            //�����ʹ���� app.UserMvc() ���� app.UseHttpsRedirection()������м����һ��Ҫ�� app.UseCors() д�����ǵ��ϱߣ��Ƚ��п����ٽ��� Http ���󣬷������ʾ����ʧ�ܡ�
-            //��Ϊ�����������漰�� Http����ģ�����㲻�����ֱ��ת������mvc���ǿ϶�����
-            app.UseCors ("LimitRequests");
+            app.UseRouting();
 
-            #region �����������������м��
-            //������֤  �������ʹ�ùٷ���֤���������ϱ�ConfigureService �У�����JWT����֤���� (.AddAuthentication �� .AddJwtBearer ����ȱһ����)
-            app.UseAuthentication ();
+            //如果你使用了 app.UserMvc() 或者 app.UseHttpsRedirection()这类的中间件，一定要把 app.UseCors() 写在它们的上边，先进行跨域，再进行 Http 请求，否则会提示跨域失败。
+            //因为这两个都是涉及到 Http请求的，如果你不跨域就直接转发或者mvc，那肯定报错
+            app.UseCors("LimitRequests");
+
+
+            #region 【第三步】：开启中间件
+            //身份验证  如果你想使用官方认证，必须在上边ConfigureService 中，配置JWT的认证服务 (.AddAuthentication 和 .AddJwtBearer 二者缺一不可)
+            app.UseAuthentication();
             #endregion
 
-            //��Ȩ
-            app.UseAuthorization ();
 
-            app.UseEndpoints (endpoints => {
-                endpoints.MapControllers ();
+            //授权
+            app.UseAuthorization();
+
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
             });
         }
     }
